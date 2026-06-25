@@ -40,28 +40,36 @@ GROUPS = [
     ]),
 ]
 
-# Friendly labels (fallback = slug).
+# Public display labels (fallback = slug). Third-party source names are
+# neutralized for the public page (eBay / 130point / PSA / B2 / MLB -> generic
+# functional names) and the raw slug line is omitted from each card, so the page
+# doesn't advertise which external sources the pipeline depends on.
 LABELS = {
     "80grade-heartbeat-cron": "Orchestrator watchdog",
     "daily-capture-heartbeat": "Daily-capture chain",
-    "psa-heartbeat": "PSA pop capture",
-    "ebay-orchestrator-heartbeat": "eBay orchestrator",
-    "capture-130point-heartbeat": "130point capture",
-    "sync-b2-heartbeat": "B2 cloud sync",
+    "psa-heartbeat": "Population capture",
+    "ebay-orchestrator-heartbeat": "Marketplace orchestrator",
+    "capture-130point-heartbeat": "Sold-comps capture",
+    "sync-b2-heartbeat": "Cloud backup sync",
     "coldstorage-heartbeat": "Cold storage",
     "sync-onetouch-heartbeat": "OneTouch sync",
     "monitor-pricing-moves-heartbeat": "Pricing moves",
     "monitor-prospect-rankings-heartbeat": "Prospect rankings",
-    "monitor-psa-pop-moves-heartbeat": "PSA pop moves",
+    "monitor-psa-pop-moves-heartbeat": "Population-move monitor",
     "monitor-prospect-news-heartbeat": "Prospect news",
-    "monitor-mlb-id-resolution-heartbeat": "MLB id resolution",
+    "monitor-mlb-id-resolution-heartbeat": "Player id resolution",
     "check-disk-space-heartbeat": "Disk space",
     "transactions-heartbeat": "Transactions",
     "retry-stuck-urls-heartbeat": "Retry stuck URLs",
 }
 
 # HC pings that fire on freshness (ran) not success (succeeded) -> show an info dot.
-FRESHNESS_ONLY = {"psa-heartbeat", "daily-capture-heartbeat", "coldstorage-heartbeat"}
+# Emptied 2026-06-25: psa / daily-capture / coldstorage are now SUCCESS-gated —
+# cycle_heartbeat.sh is status-aware (pings <slug>/fail on a failed sentinel) and
+# the chains ping /fail on their own failure path, so green now means COMPLETED
+# and no caveat dot is warranted. The mechanism stays for any future freshness-
+# only check (add its slug back here to re-enable the dot).
+FRESHNESS_ONLY = set()
 
 # hc status -> (css_key, word, color)
 STATE = {
@@ -136,8 +144,7 @@ def render(checks, now):
         return (
             f'<div class="card s-{css_key}">'
             f'<span class="dot"></span>'
-            f'<div class="meta"><div class="label">{html.escape(label)}{info}</div>'
-            f'<div class="slug">{html.escape(c["slug"])}</div></div>'
+            f'<div class="meta"><div class="label">{html.escape(label)}{info}</div></div>'
             f'<div class="right"><div class="word">{word}</div>'
             f'<div class="detail{" late" if late else ""}">{html.escape(detail)}</div></div>'
             f'</div>'

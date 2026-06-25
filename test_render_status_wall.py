@@ -41,10 +41,12 @@ def test_overdue_for_late_and_down():
     assert '13 up · 1 late · 1 down · 1 new' in html
 
 
-def test_freshness_dot_only_on_three():
+def test_no_freshness_dot_all_success_gated():
+    # 2026-06-25: psa / daily-capture / coldstorage became success-gated (status-
+    # aware watchdog + job /fail pings), so the "ran, not yet verified" info dot
+    # must no longer render for any check.
     html = r.render(load(), NOW)
-    # info glyph appears exactly for psa / daily-capture / coldstorage
-    assert html.count('class="info"') == 3
+    assert html.count('class="info"') == 0
 
 
 def test_unmapped_check_lands_in_other():
